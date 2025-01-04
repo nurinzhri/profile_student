@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profiles - UiTM E-Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #6a11cb, #2575fc);
+            color: #fff;
+            font-family: 'Arial', sans-serif;
+        }
+        .profile-container {
+            margin: 20px auto;
+            max-width: 900px;
+        }
+        .profile-card {
+            background: #ffffff;
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .actions {
+            margin-top: 10px;
+        }
+        .admin-actions {
+            display: none;
+        }
+        .btn-primary {
+            background: #2575fc;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #1a5cc7;
+        }
+        .btn-danger {
+            background: #ff5f5f;
+            border: none;
+        }
+        .btn-danger:hover {
+            background: #e64545;
+        }
+        .btn-success {
+            background: #4caf50;
+            border: none;
+        }
+        .btn-success:hover {
+            background: #3e8e41;
+        }
+        .logout {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .modal {
+            background: rgba(0, 0, 0, 0.8);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: #fff;
+            color: #333;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+    <script>
+        function getRoleFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('role');
+        }
+
+        function loadProfiles() {
+            const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+            const profileContainer = document.getElementById("profiles");
+            profileContainer.innerHTML = '';
+
+            profiles.forEach((profile, index) => {
+                const profileCard = document.createElement("div");
+                profileCard.className = "profile-card";
+                profileCard.innerHTML = `
+                    <h4>${profile.name}</h4>
+                    <p>Email: ${profile.email}</p>
+                    <p>Program: ${profile.program}</p>
+                    <div class="actions admin-actions" data-index="${index}">
+                        <button class="btn btn-primary btn-sm" onclick="editProfile(this.closest('.profile-card'))">Edit</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteProfile(this.closest('.profile-card'))">Delete</button>
+                    </div>
+                `;
+                profileContainer.appendChild(profileCard);
+            });
+        }
+
+        function saveProfiles(profiles) {
+            localStorage.setItem('profiles', JSON.stringify(profiles));
+        }
+
+        function editProfile(profileCard) {
+            const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+            const index = profileCard.querySelector(".admin-actions").dataset.index;
+            const name = prompt("Edit Name:", profileCard.querySelector("h4").textContent);
+            const email = prompt("Edit Email:", profileCard.querySelector("p:nth-of-type(1)").textContent.split(": ")[1]);
+            const program = prompt("Edit Program:", profileCard.querySelector("p:nth-of-type(2)").textContent.split(": ")[1]);
+
+            if (name && email && program) {
+                profiles[index] = { name, email, program };
+                saveProfiles(profiles);
+                loadProfiles();
+            }
+        }
+
+        function deleteProfile(profileCard) {
+            if (confirm("Are you sure you want to delete this profile?")) {
+                const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+                const index = profileCard.querySelector(".admin-actions").dataset.index;
+                profiles.splice(index, 1);
+                saveProfiles(profiles);
+                loadProfiles();
+            }
+        }
+
+        function showAddProfileModal() {
+            document.getElementById("addProfileModal").style.display = "flex";
+        }
+
+        function closeAddProfileModal() {
+            document.getElementById("addProfileModal").style.display = "none";
+        }
+
+        function addProfile(event) {
+            event.preventDefault();
+
+            const name = document.getElementById("addName").value;
+            const email = document.getElementById("addEmail").value;
+            const program = document.getElementById("addProgram").value;
+
+            if (name && email && program) {
+                const profiles = JSON.parse(localStorage.getItem('profiles')) || [];
+                profiles.push({ name, email, program });
+                saveProfiles(profiles);
+                loadProfiles();
+                closeAddProfileModal();
+                document.getElementById("addProfileForm").reset();
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProfiles();
+            const role = getRoleFromURL();
+            if (role === "admin") {
+                document.querySelectorAll(".admin-actions").forEach(el => el.style.display = "block");
+            } else {
+                document.querySelectorAll(".admin-actions").forEach(el => el.style.display = "none");
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="container profile-container">
+        <div class="logout">
+            <button class="btn btn-warning" onclick="window.location.href='login.html'">Logout</button>
+            <button class="btn btn-info" onclick="window.location.href='index.html'">Back to Main Page</button>
+        </div>
+
+        <h1 class="text-center">Profiles</h1>
+        
+        <div id="profiles"></div>
+
+        <div class="text-center admin-actions">
+            <button class="btn btn-success" onclick="showAddProfileModal()">Add New Profile</button>
+        </div>
+
+        <div class="modal" id="addProfileModal">
+            <div class="modal-content">
+                <h4>Add New Profile</h4>
+                <form id="addProfileForm" onsubmit="addProfile(event)">
+                    <div class="mb-3">
+                        <label for="addName" class="form-label">Name</label>
+                        <input type="text" id="addName" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addEmail" class="form-label">Email</label>
+                        <input type="email" id="addEmail" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="addProgram" class="form-label">Program</label>
+                        <input type="text" id="addProgram" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddProfileModal()">Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

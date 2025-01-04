@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - UiTM E-Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(to bottom, #2575fc, #6a11cb);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .top-right-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .login-container {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            color: #333;
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background: #6a11cb;
+            border: none;
+        }
+        .btn-primary:hover {
+            background: #4b0eaa;
+        }
+        a {
+            color: #6a11cb;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        function validateLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Admin credentials
+            const adminEmail = "admin@example.com";
+            const adminPassword = "admin123";
+
+            // Predefined user credentials
+            const userEmail = "user@example.com";
+            const userPassword = "user123";
+
+            if (email === adminEmail && password === adminPassword) {
+                alert("Welcome Admin!");
+                window.location.href = "profiles.html?role=admin"; // Redirect to profile page with admin role
+                return;
+            } else if (email === userEmail && password === userPassword) {
+                alert("Welcome User!");
+                window.location.href = "profiles.html?role=user"; // Redirect to profile page with user role
+                return;
+            }
+
+            // Check dynamic users from localStorage
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            const user = users.find(user => user.email === email && user.password === password);
+
+            if (user) {
+                alert(`Welcome ${email}!`);
+                window.location.href = "profiles.html?role=user";
+            } else {
+                alert("Invalid email or password. Please try again.");
+            }
+        }
+    </script>
+</head>
+<body>
+    <button class="btn btn-info top-right-button" onclick="window.location.href='index.html'">Back to Main Page</button>
+    <div class="login-container">
+        <div class="login-header">
+            <h2>Login to UiTM E-Profile</h2>
+        </div>
+        <form onsubmit="validateLogin(event)">
+            <div class="mb-3">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Login</button>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
